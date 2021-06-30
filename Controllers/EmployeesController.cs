@@ -5,6 +5,7 @@ using AutoMapper;
 using EmpDepAPI.DTO;
 using EmpDepAPI.Entities;
 using EmpDepAPI.Interfaces;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmpDepAPI.Controllers
@@ -73,6 +74,29 @@ namespace EmpDepAPI.Controllers
             
         }
 
+        [HttpPatch("updatePartial/{id}")]
+        public async Task<ActionResult<dynamic>> UpdatePartialEmployee(int id,JsonPatchDocument<EmployeeDTO> employeeDTO)
+        {
+            var resemp=await employeeService.updatePartialEmployee(id,employeeDTO);
+            if(resemp==1)
+            return NotFound($"Employee with id {id} does not exists");
+            //  var employeeToReturn=mapper.Map<EmployeeDTO>(resemp);
+            return Ok($"Employee with id {id} updated successfully");
+            
+        }
+
+        [HttpGet("highestsalary/{number}")]
+        public async Task<ActionResult<dynamic>> NthHighestSalary(int number)
+        {
+            var res=await employeeService.nthHighestSalary(number);
+            return Ok(res);
+        }
+        [HttpGet("bysalary")]
+        public async Task<ActionResult<dynamic>> EmployeebySalary(long salary)
+        {
+            var res=await employeeService.employeesBySalary(salary);
+            return Ok(res);
+        }
         [HttpPost("{id}/projects")]
         public async Task<ActionResult<dynamic>> mapProjectsInEmployee(int id,List<ProjectDTO> projectDTOs)
         {

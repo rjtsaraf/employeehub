@@ -7,6 +7,7 @@ using AutoMapper.QueryableExtensions;
 using EmpDepAPI.Data;
 using EmpDepAPI.DTO;
 using EmpDepAPI.Entities;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 
 namespace EmpDepAPI.Repository
@@ -107,6 +108,41 @@ namespace EmpDepAPI.Repository
             //dbContext.Entry(emp).CurrentValues.SetValues(employee); --> Not working in this case
             await dbContext.SaveChangesAsync();
             return 4;
+        }
+        
+        public async Task<dynamic> updatePartialEmployee(int id, JsonPatchDocument<EmployeeDTO> employeeDTO)
+        {
+            var emp=await dbContext.Employees.FindAsync(id);
+            if(emp==null)
+            return 1;
+            var dto=mapper.Map<EmployeeDTO>(emp);
+            employeeDTO.ApplyTo(dto);
+            mapper.Map(dto,emp);
+            dbContext.Update(emp);
+            await dbContext.SaveChangesAsync();
+            return 4;
+        }
+        public async Task<dynamic> nthHighestSalary(int n)
+        {
+            //var emp=await dbContext.Employees.OrderByDescending(n=>n.Salary).Skip(n-1).Take(1).FirstOrDefaultAsync();
+            var emp=await dbContext.Employees.ToListAsync();
+            var res=emp.GroupBy(e=>e.Salary).OrderByDescending(s=>s.Key).Skip(n-1).First();
+            return res;
+
+        }
+        public async Task<dynamic> employeesBySalaryAsync(long salary)
+        {
+            var emp=await dbContext.Employees.Include(s=>s.Department).ToListAsync();
+            var res=emp.GroupBy(s=>s.Salary).Where(s=>s.Key>=salary).Select(a=>new{
+                Salary=a.Key,
+                Employees=a.Select(e=>new
+                 {
+                     EmpId=e.Id,
+                     Name=e.FirstName+" "+e.LastName,
+                     Department=e.Department.Name
+                 }).OrderBy(e=>e.EmpId).ToList()
+            }).ToList();
+            return res;
         }
         public async Task<dynamic> mapProjectsInEmployee(int id,List<ProjectDTO> projectDTOs)
         {

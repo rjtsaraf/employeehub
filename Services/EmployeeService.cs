@@ -4,6 +4,7 @@ using EmpDepAPI.DTO;
 using EmpDepAPI.Entities;
 using EmpDepAPI.Interfaces;
 using EmpDepAPI.Repository;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace EmpDepAPI.Services
 {
@@ -47,6 +48,18 @@ namespace EmpDepAPI.Services
         public async Task<dynamic> updateEmployee(int id,Employee employee)
         {
             return await employeeRepository.updateEmployee(id,employee);
+        }
+        public async Task<dynamic> updatePartialEmployee(int id,JsonPatchDocument<EmployeeDTO> employeeDTO)
+        {
+            return await employeeRepository.updatePartialEmployee(id,employeeDTO);
+        }
+        public async Task<dynamic> nthHighestSalary(int n)
+        {
+            return await employeeRepository.nthHighestSalary(n);
+        }
+        public async Task<dynamic> employeesBySalary(long salary)
+        {
+            return await employeeRepository.employeesBySalaryAsync(salary);
         }
         public async Task<dynamic> deleteProjectsInEmployee(int id,List<ProjectDTO> projectDTOs)
         {
