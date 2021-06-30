@@ -123,7 +123,6 @@ namespace EmpDepAPI.Controllers
         [HttpGet("notTaggedprojectCount")]
         public async Task<ActionResult<dynamic>> getEmployeesNotInProjectCount()
         {
-            
             return Ok(await employeeService.getEmployeesNotInProjectCount());
         }
     }
