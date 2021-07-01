@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using EmpDepAPI.Data;
+using EmpDepAPI.Extensions;
 using EmpDepAPI.Helpers;
 using EmpDepAPI.Interfaces;
 using EmpDepAPI.Repository;
@@ -62,7 +63,9 @@ namespace EmpDepAPI
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EmpDepAPI v1"));
             }
-
+            
+            app.ConfigureCustomExceptionMiddleware();
+            
             app.UseHttpsRedirection();
 
             app.UseRouting();

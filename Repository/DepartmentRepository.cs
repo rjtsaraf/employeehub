@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using EmpDepAPI.Data;
 using EmpDepAPI.Entities;
+using EmpDepAPI.ErrorHandler;
 using Microsoft.EntityFrameworkCore;
 namespace EmpDepAPI.Repository
 {
@@ -20,7 +22,8 @@ namespace EmpDepAPI.Repository
         {
             var exisitngDepartment=await dbContext.Departments.Where(s=>s.Name==department.Name).FirstOrDefaultAsync();
             if(exisitngDepartment!=null)
-            return null;
+            throw new HttpStatusCodeException(HttpStatusCode.BadRequest,$"Department with the name {department.Name} already exists");
+            //return null;
             dbContext.Departments.Add(department);
             await dbContext.SaveChangesAsync();
             return department;
@@ -30,7 +33,8 @@ namespace EmpDepAPI.Repository
         {
             var dept=await dbContext.Departments.FindAsync(id);
             if(dept==null)
-            return 1;
+            throw new HttpStatusCodeException(HttpStatusCode.NotFound,$"Department with id {id} not found");
+            //return 1;
             dbContext.Departments.Remove(dept);
             await dbContext.SaveChangesAsync();
             return 2;
@@ -40,7 +44,8 @@ namespace EmpDepAPI.Repository
         {
             var dept=await dbContext.Departments.FindAsync(id);
             if(dept==null)
-            return null;
+            throw new HttpStatusCodeException(HttpStatusCode.NotFound,$"Department with id {id} does not exist");
+            //return null;
             return dept;
         }
 
@@ -132,13 +137,16 @@ namespace EmpDepAPI.Repository
                 dictionaryEmployee.Add($"Employee in the following list does not exist in the department with id {department.Id} and name {department.Name}",JsonSerializer.Serialize(employeeDeptNotSame));
                 if(employeeWithNameExists.Count>0)
                 dictionaryEmployee.Add($"Employee in the following list with same name already exists!!",JsonSerializer.Serialize(employeeWithNameExists));
-                return dictionaryEmployee;
+                throw new HttpStatusCodeException(HttpStatusCode.BadRequest,JsonSerializer.Serialize(dictionaryEmployee));
+                //return dictionaryEmployee;
             }
             else
                 await dbContext.SaveChangesAsync();
                 return null;
         }
-        return new Dictionary<string,string>();
+        else
+        throw new HttpStatusCodeException(HttpStatusCode.NotFound,$"Department with id {id} not found");
+        //return new Dictionary<string,string>();
     }
 
         public async Task<dynamic> addEmployeeInDepartmentAsync(int id,List<Employee> employees)
@@ -146,7 +154,8 @@ namespace EmpDepAPI.Repository
             var dept=await dbContext.Departments.FindAsync(id);
             var employeeList=await dbContext.Employees.ToListAsync();
             if(dept==null)
-            return null;
+            throw new HttpStatusCodeException(HttpStatusCode.NotFound,$"Deparment with id {id} does not exist!!!");
+            //return null;
             var len=dept.Employees.Count;
             List<Employee> lerr=new List<Employee>();
             List<Employee> ladd=new List<Employee>();
@@ -166,7 +175,8 @@ namespace EmpDepAPI.Repository
                  return new List<Employee>();
             }
             else 
-            return lerr;
+            throw new HttpStatusCodeException(HttpStatusCode.BadGateway,"Employees with the following names already exists!!! "+JsonSerializer.Serialize(lerr));
+            //return lerr;
         }
         public async Task<dynamic> getProjectCount()
         {
